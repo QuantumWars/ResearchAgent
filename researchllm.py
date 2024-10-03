@@ -8,8 +8,8 @@ import requests
 import json
 
 # Get API keys from Streamlit secrets
-GOOGLE_API_KEY = st.secrets["AIzaSyDz30YTv8Ny_oARpZ6ZhQZfCCODMG8y0HM"]
-PERPLEXITY_API_KEY = st.secrets["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"]
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+PERPLEXITY_API_KEY = st.secrets["PERPLEXITY_API_KEY"]
 
 # Initialize the language model
 llm = ChatGoogleGenerativeAI(
