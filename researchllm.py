@@ -7,7 +7,6 @@ import re
 import random
 import requests
 import json
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
