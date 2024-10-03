@@ -212,23 +212,4 @@ st.sidebar.info(
     "Choose your mode in the dropdown above."
 )
 
-# Footer
-st.markdown(
-    """
-    <style>
-    .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: #f0f2f6;
-        color: black;
-        text-align: center;
-    }
-    </style>
-    <div class="footer">
-        <p>Developed with ❤️ by Your Name/Company | © 2024</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+
