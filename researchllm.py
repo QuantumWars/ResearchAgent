@@ -8,8 +8,6 @@ import random
 import requests
 import json
 
-# Load environment variables
-load_dotenv()
 
 # Set the API keys
 GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"] 
