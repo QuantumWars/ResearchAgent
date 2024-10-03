@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from langchain.chains import LLMChain
@@ -6,10 +7,17 @@ import re
 import random
 import requests
 import json
+from dotenv import load_dotenv
 
-# Get API keys from Streamlit secrets
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+# Load environment variables
+load_dotenv()
+
+# Set the API keys
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"] 
 PERPLEXITY_API_KEY = st.secrets["PERPLEXITY_API_KEY"]
+
+if not GOOGLE_API_KEY or not PERPLEXITY_API_KEY:
+    raise ValueError("API keys not found. Please set GOOGLE_API_KEY and PERPLEXITY_API_KEY in your .env file.")
 
 # Initialize the language model
 llm = ChatGoogleGenerativeAI(
@@ -81,8 +89,9 @@ def create_prompt(topic, depth, focus):
     6. Potential applications or implications
     7. Challenges or limitations
     8. Conclusion or summary
+    9. Provide citation or references of the content
 
-    Be precise and concise in your explanations."""
+    Be precise and concise in your explanations. And for the citation or references, provide links."""
     return prompt
 
 def query_perplexity(prompt, api_key):
@@ -112,19 +121,48 @@ def query_perplexity(prompt, api_key):
 def format_output(response):
     if not response:
         return "No response received from Perplexity AI."
-    
     content = response['choices'][0]['message']['content']
-    citations = response.get('citations', [])
+    
+    # Try to split content into main body and references
+    parts = re.split(r'(References:|Sources:|Citation:|Bibliography:)', content, flags=re.IGNORECASE)
+    
+    if len(parts) > 1:
+        main_content = parts[0].strip()
+        references = "".join(parts[1:]).strip()
+    else:
+        main_content = content
+        references = ""
+
+    # Process references to create hyperlinks
+    processed_references = process_references(references)
+
     formatted_output = f"""
 Research Results:
 
-{content}
+{main_content}
 
-Sources:
+{processed_references}
 """
-    for citation in citations:
-        formatted_output += f"- {citation['url']}\n"
     return formatted_output
+
+def process_references(references):
+    if not references:
+        return ""
+
+    # Split references into individual items
+    ref_list = re.split(r'\n+', references)
+    processed_refs = []
+
+    for ref in ref_list:
+        # Use regex to find URLs in the reference
+        urls = re.findall(r'(https?://\S+)', ref)
+        if urls:
+            # If URL found, create a hyperlink
+            for url in urls:
+                ref = ref.replace(url, f'[{url}]({url})')
+        processed_refs.append(ref)
+
+    return "References:\n" + '\n'.join(processed_refs)
 
 def generate_research_prompts(research_dict, num_prompts=4):
     prompts = []
@@ -211,5 +249,3 @@ st.sidebar.info(
     "and get results directly from Perplexity AI.\n\n"
     "Choose your mode in the dropdown above."
 )
-
-
